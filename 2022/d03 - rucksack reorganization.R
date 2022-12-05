@@ -48,35 +48,27 @@ map(
     # create copy
     data.table::copy() |> 
     
-    # create helper column for row order
-    .DT(, R1 := .I) |> 
-    
     # split into two compartments
     .DT(, V2 := lapply(V1, function(x) {strsplit(x, paste0("(?<=.{", str_length(x) / 2, "})"), perl = TRUE)})) |>
     
     # convert from list to character
-    .DT(, .(V2 = as.character(unlist(V2))), by = .(V1, R1)) |> 
-    
-    # create helper columns for each compartment
-    .DT(, V3 := paste0("C", rowid(V1))) |> 
+    .DT(, .(V2 = as.character(unlist(V2))), by = .(V1)) |> 
     
     # break into letters
-    .DT(, V2 := strsplit(V2, split = "")) |> 
+    .DT(, V2 := strsplit(V2, split = "")) |>
     
-    # transpose to long-format
-    dcast(formula = V1 + R1 ~ V3, value.var = "V2") |> 
+    # get intersection
+    .DT(, V3 := purrr::reduce(V2, intersect), by = .(V1)) |>
     
-    # reorder table
-    .DT(order(R1)) |> 
-    
-    # calculate intersection
-    .DT(, V2 := map2_chr(.x = C1, .y = C2, .f = intersect)) |> 
+    # get unique badge group and intersection character
+    .DT(, .(V1, V3)) |> 
+    unique() |> 
     
     # get value for intersection
-    .DT(, V3 := map_dbl(.x = V2, .f = ~ v_vals[[.x]])) |>  
+    .DT(, V4 := map_dbl(.x = V3, .f = ~ v_vals[[.x]])) |>  
     
     # get sum of intersection values
-    .DT(, sum(V3))
+    .DT(, sum(V4))
   
 )
 
