@@ -4,29 +4,27 @@
 #' 
 
 
-# PACKAGES ----------------------------------------------------------------
 
-library(tidyverse)
-library(data.table)
+# SETUP -------------------------------------------------------------------
 
-# placeholder for .
+# load packages
+pacman::p_load(
+  tidyverse,
+  data.table
+)
+
+# placeholder for data.table .[]
 .DT <- `[`
+
+# load functions
+source(file = "2022/functions/key_functions.R")
+
 
 
 # READ DATA ---------------------------------------------------------------
 
 # get files
-dir(path = "2022/data/", pattern = "d03.*\\.txt", full.names = TRUE) |> 
-  
-  # set names
-  (\(.) purrr::set_names(x = ., nm = tools::file_path_sans_ext(basename(.))))() |> 
-  
-  # read data
-  map(.f = data.table::fread, header = FALSE) |> 
-  
-  # assign to variable
-  force() -> lst_data
-
+lst_data <- f_getdata(day = 3)
 
 # create a lookup vector for letter values
 v_vals <- set_names(
@@ -38,12 +36,12 @@ v_vals <- set_names(
 
 # PART ONE ----------------------------------------------------------------
 
-# loop over test set and puzzle set
-map(
-  .x = lst_data,
-  .f = ~
-    # start with data
-    .x |> 
+# start with data
+lst_data |> 
+  
+  # loop over test set and puzzle set
+  map(
+    .f = ~ .x |> 
     
     # create copy
     data.table::copy() |> 
@@ -76,12 +74,12 @@ map(
 
 # PART TWO ----------------------------------------------------------------
 
-# loop over test set and puzzle set
-map(
-  .x = lst_data,
-  .f = ~
-    # start with data
-    .x |> 
+# start with data
+lst_data |> 
+  
+  # loop over test set and puzzle set
+  map(
+    .f = ~ .x |> 
     
     # create copy
     data.table::copy() |> 
