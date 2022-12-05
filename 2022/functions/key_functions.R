@@ -6,7 +6,7 @@
 
 # GET DATA ----------------------------------------------------------------
 
-f_getdata <- function(day, path = "2022/data/", pattern = NULL, full.names = TRUE) {
+f_getdata <- function(day, path = "2022/data/", pattern = NULL, full.names = TRUE, return_paths = FALSE) {
   
   # check numeric value given
   stopifnot(is.numeric(day))
@@ -21,19 +21,31 @@ f_getdata <- function(day, path = "2022/data/", pattern = NULL, full.names = TRU
     full.names = full.names
   ) |> 
     
-    # set names
-    (\(.) setNames(object = ., nm = tools::file_path_sans_ext(basename(.))))() |>
+    # set names to filepath
+    (\(.) setNames(object = ., nm = tools::file_path_sans_ext(basename(.))))() |> 
+    
+    # assign variable
+    force() -> files
+  
+  # return result
+  if (return_paths == TRUE) {
+    
+    return(files)
+    
+  } else {
     
     # read data
-    lapply(FUN = data.table::fread, header = FALSE) |> 
+    lapply(
+      X = files,
+      FUN = data.table::fread, header = FALSE
+    ) |> 
+      
+      # assign to variable
+      force() -> lst
     
-    # assign to variable
-    force() -> lst
-  
-  
-  # return list
-  return(lst)
+    return(lst)
+    
+  }
   
 }
-
 
