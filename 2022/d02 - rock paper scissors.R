@@ -46,28 +46,22 @@ lst_data |>
   map(
     .f = ~ .x |> 
     
-    # create copy
-    data.table::copy() |> 
+      # create copy
+      data.table::copy() |> 
+      
+      # create helper columns with number conversion
+      .DT(, c("V3", "V4") := lapply(.SD, function(x) v_vals[x])) |> 
+      
+      # calculate contest (add 1 to get loss-draw-win in order, modulus 3 to account for circular nature of game)
+      .DT(, V5 := (V4 - V3 + 1) %% 3) |> 
+      
+      # calculate points and result
+      .DT(, V6 := V4 + V5 * 3) |> 
+
+      # sum total
+      .DT(, sum(V6))
     
-    # create helper columns with number conversion
-    .DT(, c("V3", "V4") := lapply(.SD, function(x) v_vals[x])) |> 
-    
-    # calculate contest (modulus 3)
-    .DT(, V5 := (V4 - V3) %% 3) |> 
-    
-    # calculate points and result
-    .DT(, V6 := 
-          V4 + fcase(
-            V5 == 0, 3, 
-            V5 == 1, 6,
-            default = 0
-          )
-    ) |> 
-    
-    # sum total
-    .DT(, sum(V6))
-  
-)
+  )
 
 
 
@@ -80,28 +74,22 @@ lst_data |>
   map(
     .f = ~ .x |> 
     
-    # create copy
-    data.table::copy() |> 
-    
-    # create helper columns with number conversion
-    .DT(, c("V3", "V4") := lapply(.SD, function(x) v_vals[x])) |> 
-    
-    # replace values
-    .DT(, V4 := (V3 + (V4 - 2) - 1) %% 3 + 1) |> 
-    
-    # calculate contest (modulus 3)
-    .DT(, V5 := (V4 - V3) %% 3) |>
-
-    # calculate points and result
-    .DT(, V6 :=
-          V4 + fcase(
-            V5 == 0, 3,
-            V5 == 1, 6,
-            default = 0
-          )
-    ) |>
-    
-    # sum total
-    .DT(, sum(V6))
-
-)
+      # create copy
+      data.table::copy() |> 
+      
+      # create helper columns with number conversion
+      .DT(, c("V3", "V4") := lapply(.SD, function(x) v_vals[x])) |> 
+      
+      # replace values
+      .DT(, V4 := (V3 + (V4 - 2) - 1) %% 3 + 1) |> 
+      
+      # calculate contest (add 1 to get loss-draw-win in order, modulus 3 to account for circular nature of game)
+      .DT(, V5 := (V4 - V3 + 1) %% 3) |> 
+      
+      # calculate points and result
+      .DT(, V6 := V4 + V5 * 3) |> 
+      
+      # sum total
+      .DT(, sum(V6))
+  
+  )
